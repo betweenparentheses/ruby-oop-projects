@@ -13,7 +13,7 @@ class GameRunner
   end
 
   def get_players
-    print "Player 1, you will will be X. What's your name? "
+    print "Player 1, you will be X. What's your name? "
     @player1.set_name(gets.chomp)
     @player1.set_mark("X")
     print "Player 2, you will be O. What's your name? "
@@ -22,7 +22,8 @@ class GameRunner
   end
 
   def get_move(current_player)
-      print "\nPlease input a place (1-9) to mark your #{current_player.mark}: "
+      print "\nPlease input a place (1-9, from upper left to lower right) to "
+      print "mark your #{current_player.mark}: "
       position = gets.chomp.to_i
   end
 
