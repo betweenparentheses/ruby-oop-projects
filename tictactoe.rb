@@ -22,15 +22,23 @@ class GameRunner
   end
 
   def get_move(current_player)
-    puts "\nPlease input a place (1-9) to mark your #{current_player.mark}: "
-    position = gets.chomp.to_i
+      print "\nPlease input a place (1-9) to mark your #{current_player.mark}: "
+      position = gets.chomp.to_i
   end
 
   def take_turns(player1, player2, current_player)
+    puts "YOUR TURN, #{current_player.name.upcase}"
     board.draw
     index = get_move(current_player)
+    while board.position(index) != nil || !((1..9) === index)
+      if board.position(index) != nil
+        puts "That's already taken."
+      else
+        puts "Sorry, that's not a good input."
+      end
+      index = get_move(current_player)
+    end
     board.make_move(index, current_player)
-    puts current_player, player1, player2
     current_player == player1 ? player2 : player1
   end
 
@@ -43,9 +51,9 @@ class GameRunner
     puts "Congratulations, #{current_player.name}. You won the coin toss and go first."
 
     current_player = take_turns(player1, player2, current_player) while board.still_playing?
-
+    board.draw
     if board.winner
-      puts "WE HAVE A WINNER! #{board.winner} has won the day!"
+      puts "\nWE HAVE A WINNER! #{board.winner} has won the day!"
       puts "Thanks for playing!"
     elsif board.is_draw?
       puts "\nGAME OVER. It's a draw."
@@ -127,7 +135,8 @@ class Board
   end
 
   def still_playing?
-    !winner  && !is_draw?
+    return true if winner.nil? && !is_draw?
+    false
   end
 
   def draw
@@ -161,6 +170,10 @@ class Box
 
   def full?
     !self.nil?
+  end
+
+  def ==(thing)
+    value == thing
   end
 end
 end
