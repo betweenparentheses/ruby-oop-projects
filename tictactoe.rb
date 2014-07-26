@@ -21,15 +21,16 @@ class GameRunner
     @player2.set_mark("O")
   end
 
-  def get_move(player)
-    puts "\nPlease input a place (1-9) to mark your #{player.mark}: "
-    player.mark_move(gets.chomp)
+  def get_move(current_player)
+    puts "\nPlease input a place (1-9) to mark your #{current_player.mark}: "
+    position = gets.chomp.to_i
   end
 
-  def take_turns(player1, player2)
+  def take_turns(player1, player2, current_player)
     board.draw
-    get_move(current_player)
-    current_player = current_player == player1 ? player2 : player1
+    index = get_move(current_player)
+    board.make_move(index, current_player)
+    current_player = (current_player == player1) ? player2 : player1
   end
 
   def start
@@ -38,15 +39,17 @@ class GameRunner
 
     get_players
     current_player = [player1,player2].sample
-    puts "Congratulations, #{current_player}. You won the coin toss and go first."
+    puts "Congratulations, #{current_player.name}. You won the coin toss and go first."
 
-    take_turns(player1, player2) while board.still_playing?
+    take_turns(player1, player2, current_player) while board.still_playing?
 
-    if board.is_draw?
+    if board.winner
+      puts "WE HAVE A WINNER! #{board.winner} has won the day!"
+      puts "Thanks for playing!"
+    elsif board.is_draw?
       puts "\nGAME OVER. It's a draw."
     else
-      puts "WE HAVE A WINNER! #{winner} has won the day!"
-      puts "Thanks for playing!"
+      puts "This is some confusing error here. Sorry."
     end
   end
 end
@@ -65,6 +68,10 @@ class Player
     @mark = mark
   end
 
+  def mark
+    @mark
+  end
+
   def == (other_player)
     self.mark == other_player.mark && self.name == other_player.name
   end
@@ -72,13 +79,13 @@ class Player
 end
 
 class Board
-  attr_reader :grid
+  attr_accessor :grid
   def initialize
     @grid = Array.new(3){Array.new(3){Box.new}}
   end
 
-  def mark_move(index, player)
-    position(index).mark(player)
+  def make_move(index, player)
+    position(index).make_mark(player)
   end
 
   def position(index)
@@ -112,18 +119,18 @@ class Board
     nil
   end
 
-  def winner?
+  def winner
     return "X" if three_in_a_row("X")
     return "O" if three_in_a_row("O")
-    false
+    nil
   end
 
   def still_playing?
-    !winner?  && !is_draw?
+    !winner  && !is_draw?
   end
 
   def draw
-     puts "#{value_at(1)}|#{value_at(2)}|#{value_at(3)}"
+     puts "\n\n#{value_at(1)}|#{value_at(2)}|#{value_at(3)}"
      puts "------"
      puts "#{value_at(4)}|#{value_at(5)}|#{value_at(6)}"
      puts "------"
@@ -141,7 +148,7 @@ class Box
     @owner = owner
   end
 
-  def mark_move(player)
+  def make_mark(player)
     @value = player.mark
     @owner = player.name
     nil
