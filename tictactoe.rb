@@ -30,7 +30,8 @@ class GameRunner
     board.draw
     index = get_move(current_player)
     board.make_move(index, current_player)
-    current_player = (current_player == player1) ? player2 : player1
+    puts current_player, player1, player2
+    current_player == player1 ? player2 : player1
   end
 
   def start
@@ -41,7 +42,7 @@ class GameRunner
     current_player = [player1,player2].sample
     puts "Congratulations, #{current_player.name}. You won the coin toss and go first."
 
-    take_turns(player1, player2, current_player) while board.still_playing?
+    current_player = take_turns(player1, player2, current_player) while board.still_playing?
 
     if board.winner
       puts "WE HAVE A WINNER! #{board.winner} has won the day!"
