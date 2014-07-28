@@ -22,7 +22,7 @@ class GameRunner
     @player2.set_mark("O")
   end
 
-#  def get_move(current_player)
+def get_move(current_player)
       print "\nPlease input a place (1-9, from upper left to lower right) to "
       print "mark your #{current_player.mark}: "
       position = gets.chomp.to_i
