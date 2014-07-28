@@ -28,7 +28,7 @@ def get_move(current_player)
       position = gets.chomp.to_i
   end
 
-#core gameplay revolves aroudn this
+#core gameplay revolves around this
   def take_turns(player1, player2, current_player)
     puts "YOUR TURN, #{current_player.name.upcase}"
     board.draw
