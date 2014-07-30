@@ -132,6 +132,7 @@ class AI < Player
         wrong_place += 1
       end
     end
+    Response.new(correct, wrong_place)
   end
 
   private
