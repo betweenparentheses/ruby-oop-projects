@@ -28,6 +28,10 @@ class Row
   def include?(value)
     @code.include?(value)
   end
+
+  def count(letter)
+    @code.count(letter)
+  end
 end
 
 
@@ -54,6 +58,10 @@ class Board
     @guesses.last
   end
 
+  def last_response
+    @responses.last
+  end
+
   def this_turn
     @guesses.size + 1
   end
@@ -75,6 +83,7 @@ class Board
       end
     end
   end
+
 end
 
 # a row represents six colors with letters A - F
@@ -88,7 +97,11 @@ class Response
   end
 
   def to_s
-    "#{@correct} correct, #{@wrong_place} right color but wrong place."
+    "#{@correct} correct, #{@wrong_place} right letter but wrong place."
+  end
+
+  def all_correct?
+    @correct == 4
   end
 end
 
@@ -104,20 +117,27 @@ class AI < Player
       letter = colors.sample
       code_string << letter
     end
-    @secret_code = Row.new("code_string")
+    @secret_code = Row.new(code_string)
   end
 
   def respond(guess)
     correct = 0
     wrong_place = 0
+    corrects = Hash.new(0)
+    p @secret_code
     (0..3).each do |index|
       letter = guess[index]
-      if @secret_code[index] == guess[index]
+      puts "#{index}: #{letter}"
+      if @secret_code[index] == letter
         correct += 1
-      elsif @secret_code.include?(guess[index])
-        wrong_place +=1
+        corrects[letter] += 1
       end
     end
+    ("A".."F").each do |letter|
+       if guess.count(letter) > corrects[letter]
+         wrong_place += guess.count(letter) - corrects[letter]
+       end
+      end
     Response.new(correct, wrong_place)
   end
 
@@ -162,6 +182,10 @@ class Game
     board.display
     get_guess(codebreaker)
     get_response(codemaker)
+    if won?
+      puts "Congratulations, codebreaker! You guessed it on turn #{board.this_turn}."
+      exit
+    end
   end
 
   def get_guess(codebreaker)
@@ -181,6 +205,11 @@ class Game
 
   def input_response(response)
     board.input_response(response)
+  end
+
+  def won?
+    last_response = board.last_response
+    last_response.all_correct?
   end
 end
 
