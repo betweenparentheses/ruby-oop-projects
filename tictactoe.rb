@@ -1,7 +1,7 @@
 module Tictactoe
 
 
-
+#some of this class is pretty procedural because it actually runs the game using the others
 class GameRunner
   attr_accessor :player1, :player2, :board, :current_player
 
@@ -12,6 +12,7 @@ class GameRunner
     @current_player = nil
   end
 
+#TODO abstract into a hash of any number of players and marks
   def get_players
     print "Player 1, you will be X. What's your name? "
     @player1.set_name(gets.chomp)
@@ -21,12 +22,13 @@ class GameRunner
     @player2.set_mark("O")
   end
 
-  def get_move(current_player)
+def get_move(current_player)
       print "\nPlease input a place (1-9, from upper left to lower right) to "
       print "mark your #{current_player.mark}: "
       position = gets.chomp.to_i
   end
 
+#core gameplay revolves around this
   def take_turns(player1, player2, current_player)
     puts "YOUR TURN, #{current_player.name.upcase}"
     board.draw
@@ -74,6 +76,7 @@ class Player
     @name = name
   end
 
+#mark is your X or your O
   def set_mark (mark)
     @mark = mark
   end
@@ -117,10 +120,14 @@ class Board
     position(index).value || " "
   end
 
+#draw as in stalemate
+#TODO: rename to is_full to remove confusion. Currently only works to determine draw
+#if you have already checked for a winner and come back falsy.
   def is_draw?
     grid.all? {|row| row.all? {|box| box.full?}}
   end
 
+#returns who gets three in a row, not just a boolean. otherwise nil.
   def three_in_a_row(mark)
     return mark if grid.any? {|row| row.all? {|value| value == mark}}
     return mark if grid.transpose.any? {|column| column.all? {|value| value == mark}}
@@ -140,6 +147,7 @@ class Board
     false
   end
 
+#draws the board. not draw as in stalemate.
   def draw
      puts "\n\n#{value_at(1)}|#{value_at(2)}|#{value_at(3)}"
      puts "------"
@@ -150,10 +158,12 @@ class Board
 
 end
 
+#individual cells in the crosshatch grid of the Board
 class Box
   attr_accessor :value
   attr_accessor :owner
 
+#has a value, "X" or "O", and an owner, the player name
   def initialize (value = nil, owner = nil)
     @value = value
     @owner = owner
