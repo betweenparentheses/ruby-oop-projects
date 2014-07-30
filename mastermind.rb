@@ -123,29 +123,23 @@ class AI < Player
   def respond(guess)
     correct = 0
     wrong_place = 0
-    corrects = Hash.new(0)
     p @secret_code
     (0..3).each do |index|
       letter = guess[index]
-      puts "#{index}: #{letter}"
       if @secret_code[index] == letter
         correct += 1
-        corrects[letter] += 1
+      elsif @secret_code.include? (letter)
+        wrong_place += 1
       end
     end
-    ("A".."F").each do |letter|
-       if guess.count(letter) > corrects[letter]
-         wrong_place += guess.count(letter) - corrects[letter]
-       end
-      end
-    Response.new(correct, wrong_place)
   end
 
   private
-
+  
   def colors
     ["A", "B", "C", "D", "E", "F"]
   end
+
 end
 
 class Human < Player
