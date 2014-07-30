@@ -169,7 +169,7 @@ class AI < Player
       @all_possible_guesses.select! { |code| code.count("B") == @letters["B"]}
       return "CCCC"    
     when 4
-      letters["C"] = board.last_correct + board.last_wrong_place
+      @letters["C"] = board.last_correct + board.last_wrong_place
       @all_possible_guesses.select! { |code| code.count("C") == @letters["C"]}
       return "DDDD"
     when 5
