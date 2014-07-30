@@ -156,7 +156,7 @@ class Game
   end
 
   def start
-    choose_sides(codemaker, codebreaker)
+    choose_sides
     get_code
     puts "The codemaker has just devised a secret code, 4 letters long, A-F. (Example: FBCA)."
     puts "Time to match wits against the machine!"
