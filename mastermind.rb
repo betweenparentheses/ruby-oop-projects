@@ -151,18 +151,35 @@ class Game
   attr_accessor :codemaker, :codebreaker, :score, :board
 
   def initialize
-    @codemaker = AI.new
-    @codebreaker = Human.new
     @board = Board.new
     @score = 0
   end
 
   def start
+    choose_sides(codemaker, codebreaker)
     get_code
     puts "The codemaker has just devised a secret code, 4 letters long, A-F. (Example: FBCA)."
     puts "Time to match wits against the machine!"
     12.times {take_turn}
   end
+  
+  def choose_sides
+    puts "Do you want to be the\nA) CODEMAKER \nor the \nB)CODEBREAKER?"
+    print "(choose A or B):"
+    answer = gets.chomp.upcase
+    until answer == "A" || answer == "B"
+     print "Try again. That's not an answer: "
+     answer = gets.chomp.upcase
+   end
+   case answer
+   when "A"
+     @codemaker = Human.new
+     @codebreaker = AI.new
+   when "B"
+     @codemaker = AI.new
+     @codebreaker = Human.new
+   end
+ end
 
   def get_code
     codemaker.devise_code
