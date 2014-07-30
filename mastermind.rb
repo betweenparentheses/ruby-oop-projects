@@ -1,7 +1,7 @@
 module Mastermind
 
 class Game
-  attr_accessor codemaker, codebreaker, score
+  attr_accessor :codemaker, :codebreaker, :score
 
   def initialize
     @codemaker = AI.new
@@ -32,12 +32,34 @@ class Game
   def answer(codemaker, turn)
     codemaker.respond(turn)
   end
-
 end
 
 #maybe
 #class Score
 #end
+
+
+class Row
+  attr_reader
+
+  def initialize(code="")
+    @code = code
+  end
+
+  def ==(other_thing)
+    self.code == other_thing.code
+  end
+
+  def each
+    self.code.each {yield}
+  end
+
+  def self=(code)
+    @code = code
+  end
+
+end
+
 
 class Board
 
@@ -81,20 +103,7 @@ class Board
 end
 
 # a row represents six colors with letters A - F
-class Row
-  attr_reader
-  def initialize(code)
-    @code = code
-  end
 
-  def ==(other_thing)
-    self.code == other_thing.code
-  end
-
-  def each
-    self.code.each {yield}
-  end
-end
 
 class Response
   attr_reader :correct, :wrong_place
@@ -102,19 +111,26 @@ class Response
     @correct = correct
     @wrong_place = wrong_place
   end
-
 end
 
-#maybe?
-#class Peg
-#end
 
 class Player
 end
 
 class AI < Player
   def devise_code
+    code_string = ""
+    4.times do
+      letter = colors.sample
+      code_string << letter
+    end
+    Row.new("code_string")
+  end
 
+  private
+
+  def colors
+    ["A", "B", "C", "D", "E", "F"]
   end
 end
 
@@ -122,5 +138,9 @@ class Human < Player
 
 end
 
-
 end
+
+include Mastermind
+
+g = Game.new
+g.start
