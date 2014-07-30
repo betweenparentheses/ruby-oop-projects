@@ -58,6 +58,14 @@ class Board
   def last_response
     @responses.last
   end
+  
+  def last_correct
+    last_response.correct #breaks Demeter in a bad way. How do I fix this?
+  end
+  
+  def last_wrong_place
+    last_response.wrong_place
+  end
 
   def this_turn
     @guesses.size + 1
@@ -135,10 +143,56 @@ class AI < Player
     end
     Response.new(correct, wrong_place)
   end
+  
+  def guess(board)
+    case board.this_turn
+    when 1
+      @letters = {}    
+      @all_possible_guesses = []
+      colors.each do |first|
+        colors.each do |second|
+          colors.each do |third|
+            colors.each do |fourth|
+              @all_possible_guesses << "#{first}#{second}#{third}#{fourth}"
+            end
+          end
+        end
+      end
+      return "AAAA"
+    when 2
+      letters["A"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("A") == letters["A"]}
+      return "BBBB"
+    when 3
+      letters["B"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("B") == letters["B"]}
+      return "CCCC"    
+    when 4
+      letters["C"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("C") == letters["C"]}
+      return "DDDD"
+    when 5
+      letters["D"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("D") == letters["D"]}
+      return "EEEE"
+    when 6
+      letters["E"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("E") == letters["E"]}
+      return "FFFF"
+    when 7
+      letters["F"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("F") == letters["F"]}
+      return @all_possible_guesses.sample
+    else 
+      @all_possible_guesses.select! {|code| code != board.last_guess}
+      return @all_possible_guesses.sample
+    end
+  end
 end
 
 class Human < Player
-  def guess
+  #only takes board to match ducktype of the AI version
+  def guess(board)
     print "Take a guess (4 letters A-F, can repeat): "
     gets.chomp.upcase
   end
