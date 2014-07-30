@@ -158,33 +158,35 @@ class AI < Player
           end
         end
       end
+      p @all_possible_guesses.sample
       return "AAAA"
     when 2
-      letters["A"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("A") == letters["A"]}
+      @letters["A"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("A") == @letters["A"]}
       return "BBBB"
     when 3
-      letters["B"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("B") == letters["B"]}
+      @letters["B"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("B") == @letters["B"]}
       return "CCCC"    
     when 4
       letters["C"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("C") == letters["C"]}
+      @all_possible_guesses.select! { |code| code.count("C") == @letters["C"]}
       return "DDDD"
     when 5
-      letters["D"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("D") == letters["D"]}
+      @letters["D"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("D") == @letters["D"]}
       return "EEEE"
     when 6
-      letters["E"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("E") == letters["E"]}
+      @letters["E"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("E") == @letters["E"]}
       return "FFFF"
     when 7
-      letters["F"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("F") == letters["F"]}
+      @letters["F"] = board.last_correct + board.last_wrong_place
+      @all_possible_guesses.select! { |code| code.count("F") == @letters["F"]}
       return @all_possible_guesses.sample
     else 
       @all_possible_guesses.select! {|code| code != board.last_guess}
+      p @all_possible_guesses
       return @all_possible_guesses.sample
     end
   end
