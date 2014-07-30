@@ -1,11 +1,8 @@
 module Mastermind
 
 
-#maybe
-#class Score
-#end
 
-
+# a row represents six colors with letters A - F
 class Row
   attr_reader
 
@@ -85,8 +82,6 @@ class Board
   end
 
 end
-
-# a row represents six colors with letters A - F
 
 
 class Response
