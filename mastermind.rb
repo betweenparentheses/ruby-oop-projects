@@ -102,6 +102,12 @@ end
 
 
 class Player
+  
+private
+  
+  def colors
+    ["A", "B", "C", "D", "E", "F"]
+  end
 end
 
 class AI < Player
@@ -129,13 +135,6 @@ class AI < Player
     end
     Response.new(correct, wrong_place)
   end
-
-  private
-  
-  def colors
-    ["A", "B", "C", "D", "E", "F"]
-  end
-
 end
 
 class Human < Player
@@ -143,6 +142,34 @@ class Human < Player
     print "Take a guess (4 letters A-F, can repeat): "
     gets.chomp.upcase
   end
+  
+  def devise_code
+     print "What's the secret code this time (4 letters A-F, can repeat letters)? "
+     code_string = gets.chomp.upcase
+     until code_string.length == 4 do
+       print "That doesn't seem right. Try again: "
+       code_string = gets.chomp.upcase
+     end
+     @secret_code = Row.new(code_string)
+  end
+  
+  def respond(guess)
+    correct = 0
+    wrong_place = 0
+    p @secret_code
+    (0..3).each do |index|
+      letter = guess[index]
+      if @secret_code[index] == letter
+        correct += 1
+      elsif @secret_code.include? (letter)
+        wrong_place += 1
+      end
+    end
+    response = Response.new(correct, wrong_place)
+    puts "The computer guessed #{guess}. As you know, that means it got #{response}"
+    response
+  end
+
 end
 
 
@@ -170,7 +197,11 @@ class Game
     until answer == "A" || answer == "B"
      print "Try again. That's not an answer: "
      answer = gets.chomp.upcase
-   end
+    end
+    set_sides(answer)
+  end
+ 
+ def set_sides(answer)
    case answer
    when "A"
      @codemaker = Human.new
