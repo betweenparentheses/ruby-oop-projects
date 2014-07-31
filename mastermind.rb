@@ -58,11 +58,11 @@ class Board
   def last_response
     @responses.last
   end
-  
+
   def last_correct
     last_response.correct #breaks Demeter in a bad way. How do I fix this?
   end
-  
+
   def last_wrong_place
     last_response.wrong_place
   end
@@ -110,9 +110,49 @@ end
 
 
 class Player
-  
+
+
+  def letters_count(code)
+    count = Hash.new(0)
+    colors.each do |letter|
+      count[letter] = code.count(letter)
+    end
+    count
+  end
+
+  def count_wrong_places(code_frequency, guess_frequency)
+    wrong_place = 0
+    colors.each do |letter|
+      if code_frequency[letter] > 0 && guess_frequency[letter] >= code_frequency[letter]
+        wrong_place += code_frequency[letter]
+      elsif code_frequency[letter] > 0 && guess_frequency[letter] > 0 && guess_frequency[letter] < code_frequency_letter
+        wrong_place += guess_frequency[letter]
+      end
+    end
+    wrong_place
+ end
+
+  def respond(guess)
+
+    code_frequency = letters_count(@secret_code)
+    guess_frequency = letters_count(guess)
+
+    correct = 0
+    (0..3).each do |index|
+      letter = guess[index]
+      if @secret_code[index] == letter
+        correct += 1
+        code_frequency[letter] -= 1
+        guess_frequency[letter] -= 1
+      end
+    end
+
+    wrong_place = count_wrong_places(code_frequency, guess_frequency)
+    Response.new(correct, wrong_place)
+  end
+
 private
-  
+
   def colors
     ["A", "B", "C", "D", "E", "F"]
   end
@@ -129,25 +169,10 @@ class AI < Player
     @secret_code = Row.new(code_string)
   end
 
-  def respond(guess)
-    correct = 0
-    wrong_place = 0
-    p @secret_code
-    (0..3).each do |index|
-      letter = guess[index]
-      if @secret_code[index] == letter
-        correct += 1
-      elsif @secret_code.include? (letter)
-        wrong_place += 1
-      end
-    end
-    Response.new(correct, wrong_place)
-  end
-  
   def guess(board)
     case board.this_turn
     when 1
-      @letters = {}    
+      @letters = {}
       @all_possible_guesses = []
       colors.each do |first|
         colors.each do |second|
@@ -158,7 +183,6 @@ class AI < Player
           end
         end
       end
-      p @all_possible_guesses.sample
       return "AAAA"
     when 2
       @letters["A"] = board.last_correct + board.last_wrong_place
@@ -167,7 +191,7 @@ class AI < Player
     when 3
       @letters["B"] = board.last_correct + board.last_wrong_place
       @all_possible_guesses.select! { |code| code.count("B") == @letters["B"]}
-      return "CCCC"    
+      return "CCCC"
     when 4
       @letters["C"] = board.last_correct + board.last_wrong_place
       @all_possible_guesses.select! { |code| code.count("C") == @letters["C"]}
@@ -184,9 +208,8 @@ class AI < Player
       @letters["F"] = board.last_correct + board.last_wrong_place
       @all_possible_guesses.select! { |code| code.count("F") == @letters["F"]}
       return @all_possible_guesses.sample
-    else 
+    else
       @all_possible_guesses.select! {|code| code != board.last_guess}
-      p @all_possible_guesses
       return @all_possible_guesses.sample
     end
   end
@@ -198,7 +221,7 @@ class Human < Player
     print "Take a guess (4 letters A-F, can repeat): "
     gets.chomp.upcase
   end
-  
+
   def devise_code
      print "What's the secret code this time (4 letters A-F, can repeat letters)? "
      code_string = gets.chomp.upcase
@@ -207,23 +230,6 @@ class Human < Player
        code_string = gets.chomp.upcase
      end
      @secret_code = Row.new(code_string)
-  end
-  
-  def respond(guess)
-    correct = 0
-    wrong_place = 0
-    p @secret_code
-    (0..3).each do |index|
-      letter = guess[index]
-      if @secret_code[index] == letter
-        correct += 1
-      elsif @secret_code.include? (letter)
-        wrong_place += 1
-      end
-    end
-    response = Response.new(correct, wrong_place)
-    puts "The computer guessed #{guess}. As you know, that means it got #{response}"
-    response
   end
 
 end
@@ -244,11 +250,13 @@ class Game
     puts "The codemaker has just devised a secret code, 4 letters long, A-F. (Example: FBCA)."
     puts "Time to match wits against the machine!"
     12.times {take_turn}
+    puts codebreaker.is_a?(Human) ? "Tragically, you have failed to break the code.":"Victory! The computer failed to outthink you!"
+
   end
-  
+
   def choose_sides
-    puts "Do you want to be the\nA) CODEMAKER \nor the \nB)CODEBREAKER?"
-    print "(choose A or B):"
+    puts "Do you want to be the\nA) CODEMAKER \nor the \nB) CODEBREAKER?"
+    print "(choose A or B): "
     answer = gets.chomp.upcase
     until answer == "A" || answer == "B"
      print "Try again. That's not an answer: "
@@ -256,7 +264,7 @@ class Game
     end
     set_sides(answer)
   end
- 
+
  def set_sides(answer)
    case answer
    when "A"
@@ -273,17 +281,24 @@ class Game
   end
 
   def take_turn
-    board.display
+
     get_guess(codebreaker)
     get_response(codemaker)
-    if won?
-      puts "Congratulations, codebreaker! You guessed it on turn #{board.this_turn}."
+    board.display
+    if won? && codebreaker.is_a?(Human)
+      puts "Congratulations! You guessed it on turn #{board.last_turn}."
+      exit
+    elsif won? && codebreaker.is_a?(AI)
+      puts "Your clever code has been cracked on turn #{board.last_turn}."
+      puts "Better luck next time!"
       exit
     end
+    print "*** Press Enter For Next Turn ***"
+    gets
   end
 
   def get_guess(codebreaker)
-    guess = codebreaker.guess
+    guess = codebreaker.guess(board)
     input_guess(guess)
   end
 
