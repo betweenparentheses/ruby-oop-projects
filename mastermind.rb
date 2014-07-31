@@ -4,7 +4,6 @@ module Mastermind
 
 # a row represents six colors with letters A - F
 class Row
-  attr_reader
 
   def initialize(code="")
     @code = code
@@ -40,7 +39,7 @@ class Board
   end
 
   def set_code(code)
-    @code ||= code #test this to make sure it works
+    @code ||= code
   end
 
   def input_guess(row)
@@ -111,6 +110,17 @@ end
 
 class Player
 
+  def respond(guess)
+    @code_frequency = letters_count(@secret_code)
+    @guess_frequency = letters_count(guess)
+
+    correct = count_correct(guess)
+    wrong_place = count_wrong_places(@code_frequency, @guess_frequency)
+
+    Response.new(correct, wrong_place)
+  end
+
+private
 
   def letters_count(code)
     count = Hash.new(0)
@@ -130,28 +140,20 @@ class Player
       end
     end
     wrong_place
- end
+  end
 
-  def respond(guess)
-
-    code_frequency = letters_count(@secret_code)
-    guess_frequency = letters_count(guess)
-
+  def count_correct(guess)
     correct = 0
     (0..3).each do |index|
       letter = guess[index]
       if @secret_code[index] == letter
         correct += 1
-        code_frequency[letter] -= 1
-        guess_frequency[letter] -= 1
+        @code_frequency[letter] -= 1
+        @guess_frequency[letter] -= 1
       end
     end
-
-    wrong_place = count_wrong_places(code_frequency, guess_frequency)
-    Response.new(correct, wrong_place)
+    correct
   end
-
-private
 
   def colors
     ["A", "B", "C", "D", "E", "F"]
@@ -159,6 +161,20 @@ private
 end
 
 class AI < Player
+
+  def initialize
+    @letters = {}
+    @all_possible_guesses = []
+    colors.each do |first|
+      colors.each do |second|
+        colors.each do |third|
+          colors.each do |fourth|
+            @all_possible_guesses << "#{first}#{second}#{third}#{fourth}"
+          end
+        end
+      end
+    end
+  end
 
   def devise_code
     code_string = ""
@@ -169,44 +185,37 @@ class AI < Player
     @secret_code = Row.new(code_string)
   end
 
+#given a letter, and knowinr
+  def remove_impossibles(letter, board)
+    @letters[letter] = board.last_correct
+    @all_possible_guesses.select! { |code| code.count(letter) == @letters[letter]}
+  end
+
+#This is a stupid algorithm that wins about half the time
+#Guesses four of each letter to determine frequency of characters
+#and then guesses randomly from the 16-or-fewer combinations that remain,
+#removing any that didn't win.
   def guess(board)
     case board.this_turn
     when 1
-      @letters = {}
-      @all_possible_guesses = []
-      colors.each do |first|
-        colors.each do |second|
-          colors.each do |third|
-            colors.each do |fourth|
-              @all_possible_guesses << "#{first}#{second}#{third}#{fourth}"
-            end
-          end
-        end
-      end
       return "AAAA"
     when 2
-      @letters["A"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("A") == @letters["A"]}
+      remove_impossibles("A", board)
       return "BBBB"
     when 3
-      @letters["B"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("B") == @letters["B"]}
+      remove_impossibles("B", board)
       return "CCCC"
     when 4
-      @letters["C"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("C") == @letters["C"]}
+      remove_impossibles("C", board)
       return "DDDD"
     when 5
-      @letters["D"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("D") == @letters["D"]}
+      remove_impossibles("D", board)
       return "EEEE"
     when 6
-      @letters["E"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("E") == @letters["E"]}
+      remove_impossibles("E", board)
       return "FFFF"
     when 7
-      @letters["F"] = board.last_correct + board.last_wrong_place
-      @all_possible_guesses.select! { |code| code.count("F") == @letters["F"]}
+      remove_impossibles("F", board)
       return @all_possible_guesses.sample
     else
       @all_possible_guesses.select! {|code| code != board.last_guess}
